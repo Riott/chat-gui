@@ -1066,6 +1066,9 @@ class Chat {
             this.regexhighlightcustom.test(
               `${message.user.username} ${message.message}`
             )));
+
+      const userInfoMenu = this.menus.get('user-info');
+      userInfoMenu.emit(`addMessage`, message);
     }
 
     // This looks odd, although it would be a correct implementation

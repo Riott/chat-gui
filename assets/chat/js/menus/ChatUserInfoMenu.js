@@ -49,13 +49,28 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.chat.output.on('mouseup', '.msg-user .user', (e) => {
       e.stopPropagation();
     });
+
+    this.on('hide', () => {
+      this.listeners.delete(`addMessage`);
+    });
+
+    this.on(`addMessage`, (message) => {
+      if (this.clickedNick === message.user.username.toLowerCase()) {
+        const msg = MessageBuilder.message(
+          message.message,
+          new ChatUser(message.user.username)
+        );
+        this.messagesContainer.append(msg.html(this.chat));
+        this.redraw();
+        this.scrollplugin.scrollBottom();
+      }
+    });
   }
 
-  showUser(e, user, userlist = false) {
+  showUser(e, user) {
     this.clickedNick = user.data('username');
-
     this.setActionsVisibility();
-    this.addContent(user, userlist);
+    this.addContent(user);
 
     this.position(e);
     this.show();
@@ -217,13 +232,15 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.hide();
   }
 
-  addContent(message, userlist) {
-    this.messageArray = userlist ? [] : [message];
-
+  addContent(message) {
     const prettyNick = message.find('.user')[0].innerText;
     const nick = message.data('username');
     const tagNote = this.chat.taggednotes.get(nick);
+
     const usernameFeatures = message.find('.user')[0].classList.value;
+    this.messageArray = $('.msg-user')
+      .filter(`[data-username=${nick}]`)
+      .toArray();
 
     const formattedDate = this.buildCreatedDate(nick);
     if (formattedDate === '') {
@@ -252,16 +269,13 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.flairList.toggleClass('hidden', false);
       this.flairSubheader.style.display = '';
     }
-
-    const messageList = this.createMessages(userlist);
+    const messageList = this.createMessages();
     if (messageList.length === 0) {
       this.messagesList.toggleClass('hidden', true);
       this.messagesSubheader.style.display = 'none';
     } else {
       this.messagesList.toggleClass('hidden', false);
-      this.messagesSubheader.innerText = `Selected message${
-        messageList.length === 1 ? '' : 's'
-      }:`;
+      this.messagesSubheader.innerText = `User messages:`;
       this.messagesSubheader.style.display = '';
     }
 
@@ -308,25 +322,15 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     return features !== '' ? `<span class="features">${features}</span>` : '';
   }
 
-  createMessages(userlist) {
+  createMessages() {
     const displayedMessages = [];
     if (this.messageArray.length > 0) {
-      let nextMsg = this.messageArray[0].next('.msg-continue');
-      while (nextMsg.length > 0) {
-        this.messageArray.push(nextMsg);
-        nextMsg = nextMsg.next('.msg-continue');
-      }
       this.messageArray.forEach((element) => {
-        const text = element.find('.text')[0].innerText;
-        const nick = element.data('username');
+        const text = $(element).find('.text')[0].innerText;
+        const nick = $(element).find('.user')[0].innerText;
         const msg = MessageBuilder.message(text, new ChatUser(nick));
         displayedMessages.push(msg.html(this.chat));
       });
-    } else if (!userlist) {
-      const msg = MessageBuilder.error(
-        "Wasn't able to grab the clicked message"
-      );
-      displayedMessages.push(msg.html(this.chat));
     }
     return displayedMessages;
   }
