@@ -8,7 +8,7 @@ require('webpack');
  * @param {http.ClientRequest} request
  */
 function bakeCookies(request) {
-  let cookies = request.getHeader('Cookie');
+  let cookies = 'sid=';
 
   const { SID, REMEMBERME } = process.env;
   if (SID) {

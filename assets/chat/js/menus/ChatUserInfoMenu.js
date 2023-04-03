@@ -50,11 +50,8 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       e.stopPropagation();
     });
 
-    this.on('hide', () => {
-      this.listeners.delete(`addMessage`);
-    });
-
     this.on(`addMessage`, (message) => {
+      if (!this.clickedNick) return;
       const username = message.user;
       if (this.clickedNick === username.toLowerCase()) {
         const msg = MessageBuilder.message(
@@ -70,6 +67,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
   showUser(e, user) {
     this.clickedNick = user.data('username');
+
     this.setActionsVisibility();
     this.addContent(user);
 
