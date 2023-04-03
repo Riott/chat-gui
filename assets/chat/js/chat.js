@@ -899,9 +899,7 @@ class Chat {
   setHistory(history) {
     if (history && history.length > 0) {
       this.backlogloading = true;
-      history.forEach((line) => {
-        this.source.parseAndDispatch({ data: line });
-      });
+      history.forEach((line) => this.source.parseAndDispatch({ data: line }));
       this.backlogloading = false;
       MessageBuilder.element('<hr/>').into(this);
       this.mainwindow.update(true);
