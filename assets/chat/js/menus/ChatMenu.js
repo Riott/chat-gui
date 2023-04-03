@@ -27,6 +27,7 @@ export default class ChatMenu extends EventEmitter {
       this.btn.addClass('active');
       this.ui.addClass('active');
       this.redraw();
+      this.scrollplugin.scrollBottom();
       this.emit('show');
     }
   }

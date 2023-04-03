@@ -55,10 +55,11 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     });
 
     this.on(`addMessage`, (message) => {
-      if (this.clickedNick === message.user.username.toLowerCase()) {
+      const username = message.user;
+      if (this.clickedNick === username.toLowerCase()) {
         const msg = MessageBuilder.message(
           message.message,
-          new ChatUser(message.user.username)
+          new ChatUser(username)
         );
         this.messagesContainer.append(msg.html(this.chat));
         this.redraw();
@@ -238,10 +239,9 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     const tagNote = this.chat.taggednotes.get(nick);
 
     const usernameFeatures = message.find('.user')[0].classList.value;
-    this.messageArray = $('.msg-user')
-      .filter(`[data-username=${nick}]`)
-      .toArray();
-
+    this.messageArray = this.chat.history
+      .filter((element) => element.user === prettyNick)
+      .sort((a, b) => a.timestamp - b.timestamp);
     const formattedDate = this.buildCreatedDate(nick);
     if (formattedDate === '') {
       this.createdDateSubheader.style.display = 'none';
@@ -326,9 +326,9 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     const displayedMessages = [];
     if (this.messageArray.length > 0) {
       this.messageArray.forEach((element) => {
-        const text = $(element).find('.text')[0].innerText;
-        const nick = $(element).find('.user')[0].innerText;
-        const msg = MessageBuilder.message(text, new ChatUser(nick));
+        const { user } = element;
+        const { message } = element;
+        const msg = MessageBuilder.message(message, new ChatUser(user));
         displayedMessages.push(msg.html(this.chat));
       });
     }

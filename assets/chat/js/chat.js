@@ -596,6 +596,7 @@ class Chat {
     this.mutedtimer = new MutedTimer(this);
     this.chatpoll = new ChatPoll(this);
     this.pinnedMessage = null;
+    this.history = [];
 
     this.windowToFront('main');
 
@@ -898,7 +899,9 @@ class Chat {
   setHistory(history) {
     if (history && history.length > 0) {
       this.backlogloading = true;
-      history.forEach((line) => this.source.parseAndDispatch({ data: line }));
+      history.forEach((line) => {
+        this.source.parseAndDispatch({ data: line });
+      });
       this.backlogloading = false;
       MessageBuilder.element('<hr/>').into(this);
       this.mainwindow.update(true);
@@ -1066,9 +1069,6 @@ class Chat {
             this.regexhighlightcustom.test(
               `${message.user.username} ${message.message}`
             )));
-
-      const userInfoMenu = this.menus.get('user-info');
-      userInfoMenu.emit(`addMessage`, message);
     }
 
     // This looks odd, although it would be a correct implementation
@@ -1394,6 +1394,19 @@ class Chat {
       }
     } else if (!this.resolveMessage(data.nick, data.data)) {
       MessageBuilder.message(data.data, usr, data.timestamp).into(this);
+    }
+    const historyContainsMessage = this.history.some(
+      (element) => element.message === data.data
+    );
+    const userInfoMenu = this.menus.get('user-info');
+    if (!historyContainsMessage) {
+      const msg = {
+        user: data.nick,
+        message: data.data,
+        timestamp: data.timestamp,
+      };
+      this.history.push(msg);
+      userInfoMenu.emit(`addMessage`, msg);
     }
   }
 
