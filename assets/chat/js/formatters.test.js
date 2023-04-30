@@ -45,7 +45,7 @@ describe('Inject tag', () => {
     ],
   ])('%s', (_, message, expectedMessage, stub) => {
     const injector = new AmazonAssociatesTagInjector();
-    expect(injector.format(stub, message)).toBe(expectedMessage);
+    expect(injector.format(stub, message)).toBe(`${expectedMessage}potato`);
   });
 });
 
